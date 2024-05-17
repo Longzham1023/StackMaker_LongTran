@@ -1,77 +1,105 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MobleInput : MonoBehaviour
 {
-    public static MobleInput Instance { set; get; }
-    public bool tap , swipeLeft, swipeRight, swipeUp, swipeDown;
-    public Vector2 swipeDelta, startTounch;
-    private const float deadZone = 100;
+    public static MobleInput Instance { get; private set; }
 
-    // Start is called before the first frame update
-    private void Awake()
+    public bool tap, swipeLeft, swipeRight, swipeUp, swipeDown;
+    public Vector2 startTouch, endTouch, swipeDelta;
+
+    private const float deadZone = 100f;
+
+    public enum Direction
     {
-        Instance = this;   
+        None,
+        Left,
+        Right,
+        Up,
+        Down
     }
 
-    // Update is called once per frame
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     private void Update()
     {
         tap = swipeLeft = swipeRight = swipeUp = swipeDown = false;
-        //Nhan click chuot tu man hinh//
-        if(Input.GetMouseButtonDown(0))
+
+        if (Input.GetMouseButtonDown(0))
         {
             tap = true;
-            startTounch = Input.mousePosition;
-        }else if (Input.GetMouseButtonUp(0))
-        {
-            startTounch = swipeDelta = Vector2.zero;
+            startTouch = Input.mousePosition;
         }
-
-        swipeDelta = Vector2.zero;
-        //Khi nhan huong vector tinh do dai//
-        if(startTounch != Vector2.zero)
+        else if (Input.GetMouseButtonUp(0))
         {
-            if(Input.touches.Length != 0)
-            {
-                swipeDelta = Input.touches[0].position - startTounch;
-            }else if(Input.GetMouseButton(0))
-            {
-                swipeDelta = (Vector2)Input.mousePosition - startTounch;
-            }
-        }
+            endTouch = Input.mousePosition;
+            swipeDelta = endTouch - startTouch;
 
-        //Tinh vach dich//
-        if(swipeDelta.magnitude > deadZone)
-        {
-            float x = swipeDelta.x;
-            float y = swipeDelta.y;
-
-            if(Mathf.Abs(x) > Mathf.Abs(y))
+            if (swipeDelta.magnitude > deadZone)
             {
-                if(x<0)
+                float x = swipeDelta.x;
+                float y = swipeDelta.y;
+
+                if (Mathf.Abs(x) > Mathf.Abs(y))
                 {
-                    swipeLeft = true;
+                    if (x < 0)
+                        swipeLeft = true;
+                    else
+                        swipeRight = true;
                 }
                 else
                 {
-                    swipeRight = true;
+                    if (y < 0)
+                        swipeDown = true;
+                    else
+                        swipeUp = true;
                 }
             }
+        }
+    }
+
+    // Get direction based on enum value
+    public Vector3 GetDirection(Direction direction)
+    {
+        switch (direction)
+        {
+            case Direction.None:
+                return Vector3.zero;
+            case Direction.Left:
+                return Vector3.left;
+            case Direction.Right:
+                return Vector3.right;
+            case Direction.Up:
+                return Vector3.up;
+            case Direction.Down:
+                return Vector3.down;
+            default:
+                return Vector3.zero;
+        }
+    }
+    public Direction GetSwipeDirection()
+    {
+        if (swipeDelta == Vector2.zero)
+            return Direction.None;
+
+        float x = swipeDelta.x;
+        float y = swipeDelta.y;
+
+        if (Mathf.Abs(x) > Mathf.Abs(y))
+        {
+            if (x < 0)
+                return Direction.Left;
             else
-            {
-                if(y < 0)
-                {
-                    swipeDown = true;
-                }
-                else
-                {
-                    swipeUp = true;
-                }
-            }
-
-            startTounch = swipeDelta = Vector2.zero ;
+                return Direction.Right;
+        }
+        else
+        {
+            if (y < 0)
+                return Direction.Down;
+            else
+                return Direction.Up;
         }
     }
 }
