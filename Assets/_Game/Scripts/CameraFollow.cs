@@ -8,6 +8,7 @@ public class CameraFollow : MonoBehaviour
     public Vector3 offest;
     public float value;
 
+    //vi tri camera ban dau va theo sau nhan vat
     private void LateUpdate()
     {
         Vector3 pos = traget.position + offest;

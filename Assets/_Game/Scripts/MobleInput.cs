@@ -1,14 +1,16 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class MobleInput : MonoBehaviour
 {
+    //public
     public static MobleInput Instance { get; private set; }
-
     public bool tap, swipeLeft, swipeRight, swipeUp, swipeDown;
     public Vector2 startTouch, endTouch, swipeDelta;
 
+    //private
     private const float deadZone = 100f;
 
+    //enum
     public enum Direction
     {
         None,
@@ -22,7 +24,7 @@ public class MobleInput : MonoBehaviour
     {
         Instance = this;
     }
-
+    // thuat toan //
     private void Update()
     {
         tap = swipeLeft = swipeRight = swipeUp = swipeDown = false;
@@ -60,7 +62,7 @@ public class MobleInput : MonoBehaviour
         }
     }
 
-    // Get direction based on enum value
+    // lấy vị trí dựa theo giá trị enum
     public Vector3 GetDirection(Direction direction)
     {
         switch (direction)

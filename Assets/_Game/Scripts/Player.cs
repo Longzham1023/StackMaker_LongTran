@@ -7,9 +7,7 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public static PlayerMovement instance;
-    private Rigidbody rb;
-
+    //Ser private
     [SerializeField] Transform player;
     [SerializeField] private GameObject brickPrefab;
     [SerializeField] private GameObject wallPrefab;
@@ -17,15 +15,27 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Vector3 direction;
     [SerializeField] private List<GameObject> brickList;
     [SerializeField] private TextMeshProUGUI point;
-    private int number;
 
+    //public
+    public static PlayerMovement instance;
     public GameObject uiElement;
     public float speed;
     public MobleInput input;
+    public float range = -2.05f;
+
+    //private
+    private Rigidbody rb;
+    private int number;
     private bool isMoving = false;
     private bool canMove = true;
-    public float range = -2.05f;
+
+    //float
     float jumpHigh;
+
+
+    /// <summary>
+    ////////////////////////////////////// bat dau code////////////////////////////////////////////////////////
+    /// </summary>
 
     private void Awake()
     {
@@ -71,13 +81,13 @@ public class PlayerMovement : MonoBehaviour
             {
                 hasHitWall = true;
                 rb.velocity = Vector3.zero;
-                isMoving = true;
+                isMoving = false;
             }
 
             //bat va cham va nhat gach
             if (hit.collider.CompareTag("Dashpickup"))
             {
-                isMoving = false;
+                isMoving = true;
                 jumpHigh += 0.3f;
                 player.transform.position = new Vector3(transform.position.x, transform.position.y + jumpHigh,
                     transform.position.z);
@@ -94,11 +104,14 @@ public class PlayerMovement : MonoBehaviour
             {
                 if(brickList.Count > 0)
                 {
+                    //tang chieu cao cho nhan vat//
                     jumpHigh -= 0.3f;
                     player.transform.position = new Vector3(transform.position.x, transform.position.y + jumpHigh,
                         transform.position.z);
+                    //tat gach duoi san//
                     hit.collider.gameObject.GetComponent<MeshRenderer>().enabled = true;
                     hit.collider.gameObject.GetComponent<Collider>().enabled = false;
+                    //xoa gach duoi chan nhan vat
                     Destroy(brickList[brickList.Count - 1].gameObject);
                     brickList.RemoveAt(brickList.Count - 1);
                 }
@@ -115,6 +128,8 @@ public class PlayerMovement : MonoBehaviour
                 hasHitWall = true;
                 rb.velocity = Vector3.zero;
                 //hit.collider.gameObject.SetActive(false);
+
+                //xoa tat ca gach duoi chan va cho nhan vat ve lai vi tri ban dau//
                 while (brickList.Count > 0)
                 {
                     jumpHigh -= 0.3f;
@@ -123,11 +138,11 @@ public class PlayerMovement : MonoBehaviour
                     Destroy(brickList[brickList.Count - 1].gameObject);
                     brickList.RemoveAt(brickList.Count - 1);
                 }
-                uiElement.SetActive(true);
-                Time.timeScale = 2;
-                
+                StartCoroutine(ActivateUIAfterDelay(3f));
+
             }
-            /*if (hit.collider.CompareTag("ChessOpen"))
+            /*
+            if (hit.collider.CompareTag("ChessOpen"))
             {
                 Debug.Log(1);
                 hit.collider.gameObject.SetActive(true);
@@ -136,38 +151,47 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    ///////////////////////////Di chuyen va bat chuyen dong cua nhan vat/////////////////
     public bool MoveCharacter()
     {
         bool movement = false;
 
-        isMoving = true;
-        if (Input.GetKeyDown(KeyCode.LeftArrow) || MobleInput.Instance.GetSwipeDirection() == MobleInput.Direction.Left)
-        {
-            rb.velocity = Vector3.left * speed * Time.deltaTime;
-            direction = Vector3.left;
-            movement = true;
-        }
-        else if (Input.GetKeyDown(KeyCode.RightArrow) || MobleInput.Instance.GetSwipeDirection() == MobleInput.Direction.Right)
-        {
-            rb.velocity = Vector3.right * speed * Time.deltaTime;
-            direction = Vector3.right;
-            movement = true;
+        if(isMoving == false){
 
-        }
-        else if (Input.GetKeyDown(KeyCode.UpArrow) || MobleInput.Instance.GetSwipeDirection() == MobleInput.Direction.Up)
-        {
-            rb.velocity = Vector3.forward * speed * Time.deltaTime;
-            direction = Vector3.forward;
-            movement = true;
+            if (Input.GetKeyDown(KeyCode.LeftArrow) || MobleInput.Instance.GetSwipeDirection() == MobleInput.Direction.Left)
+            {
+                rb.velocity = Vector3.left * speed * Time.deltaTime;
+                direction = Vector3.left;
+                movement = true;
+            }
+            else if (Input.GetKeyDown(KeyCode.RightArrow) || MobleInput.Instance.GetSwipeDirection() == MobleInput.Direction.Right)
+            {
+                rb.velocity = Vector3.right * speed * Time.deltaTime;
+                direction = Vector3.right;
+                movement = true;
 
-        }
-        else if (Input.GetKeyDown(KeyCode.DownArrow) || MobleInput.Instance.GetSwipeDirection() == MobleInput.Direction.Down)
-        {
-            rb.velocity = -Vector3.forward * speed * Time.deltaTime;
-            direction = -Vector3.forward;
-            movement = true;
+            }
+            else if (Input.GetKeyDown(KeyCode.UpArrow) || MobleInput.Instance.GetSwipeDirection() == MobleInput.Direction.Up)
+            {
+                rb.velocity = Vector3.forward * speed * Time.deltaTime;
+                direction = Vector3.forward;
+                movement = true;
 
+            }
+            else if (Input.GetKeyDown(KeyCode.DownArrow) || MobleInput.Instance.GetSwipeDirection() == MobleInput.Direction.Down)
+            {
+                rb.velocity = -Vector3.forward * speed * Time.deltaTime;
+                direction = -Vector3.forward;
+                movement = true;
+            }
         }
         return movement;
+    }
+    ///////////////////////////Hien UI/////////////////
+    IEnumerator ActivateUIAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        uiElement.SetActive(true);
     }
 }
